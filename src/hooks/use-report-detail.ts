@@ -1,66 +1,71 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import type { Report, ReportNote, ReportStatus, User } from '@/lib/types'
 
+async function fetchReportDetail(reportId: string) {
+  const [reportRes, notesRes, usersRes] = await Promise.all([
+    api.get<Report>(`/reports/${reportId}`),
+    api.get<ReportNote[]>(`/reports/${reportId}/notes`),
+    api.get<User[]>('/users'),
+  ])
+  return {
+    report: reportRes.data,
+    notes: notesRes.data,
+    vigilants: usersRes.data.filter((u) => u.role === 'VIGILANT' || u.role === 'ADMIN'),
+  }
+}
+
 export function useReportDetail(reportId: string | null) {
-  const [report, setReport] = useState<Report | null>(null)
-  const [notes, setNotes] = useState<ReportNote[]>([])
-  const [vigilants, setVigilants] = useState<User[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
-  const fetchReport = useCallback(async () => {
-    if (!reportId) {
-      setReport(null)
-      setNotes([])
-      return
-    }
-    setIsLoading(true)
-    try {
-      const [reportRes, notesRes, usersRes] = await Promise.all([
-        api.get<Report>(`/reports/${reportId}`),
-        api.get<ReportNote[]>(`/reports/${reportId}/notes`),
-        api.get<User[]>('/users'),
-      ])
-      setReport(reportRes.data)
-      setNotes(notesRes.data)
-      setVigilants(usersRes.data.filter((u) => u.role === 'VIGILANT' || u.role === 'ADMIN'))
-    } catch (err) {
-      console.error('Failed to fetch report detail:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [reportId])
+  const { data, isLoading } = useQuery({
+    queryKey: ['report', reportId],
+    queryFn: () => fetchReportDetail(reportId!),
+    enabled: !!reportId,
+  })
 
-  useEffect(() => {
-    fetchReport()
-  }, [fetchReport])
-
-  const updateStatus = useCallback(
-    async (status: ReportStatus) => {
-      if (!reportId) return
-      const { data } = await api.patch<Report>(`/reports/${reportId}/status`, { status })
-      setReport(data)
+  const statusMutation = useMutation({
+    mutationFn: (status: ReportStatus) =>
+      api.patch<Report>(`/reports/${reportId}/status`, { status }),
+    onSuccess: (res) => {
+      queryClient.setQueryData(['report', reportId], (old: typeof data) =>
+        old ? { ...old, report: { ...old.report, ...res.data } } : old,
+      )
+      queryClient.invalidateQueries({ queryKey: ['reports'] })
     },
-    [reportId],
-  )
+  })
 
-  const assignVigilant = useCallback(
-    async (assignedToId: string) => {
-      if (!reportId) return
-      const { data } = await api.patch<Report>(`/reports/${reportId}/assign`, { assignedToId })
-      setReport(data)
+  const assignMutation = useMutation({
+    mutationFn: (assignedToId: string) =>
+      api.patch<Report>(`/reports/${reportId}/assign`, { assignedToId }),
+    onSuccess: (res) => {
+      queryClient.setQueryData(['report', reportId], (old: typeof data) =>
+        old ? { ...old, report: { ...old.report, ...res.data } } : old,
+      )
+      queryClient.invalidateQueries({ queryKey: ['reports'] })
     },
-    [reportId],
-  )
+  })
 
-  const addNote = useCallback(
-    async (content: string) => {
-      if (!reportId) return
-      const { data } = await api.post<ReportNote>(`/reports/${reportId}/notes`, { content })
-      setNotes((prev) => [data, ...prev])
+  const noteMutation = useMutation({
+    mutationFn: (content: string) =>
+      api.post<ReportNote>(`/reports/${reportId}/notes`, { content }),
+    onSuccess: (res) => {
+      queryClient.setQueryData(['report', reportId], (old: typeof data) =>
+        old ? { ...old, notes: [res.data, ...old.notes] } : old,
+      )
     },
-    [reportId],
-  )
+  })
 
-  return { report, notes, vigilants, isLoading, updateStatus, assignVigilant, addNote, refetch: fetchReport }
+  return {
+    report: data?.report ?? null,
+    notes: data?.notes ?? [],
+    vigilants: data?.vigilants ?? [],
+    isLoading,
+    updateStatus: statusMutation.mutateAsync,
+    isUpdatingStatus: statusMutation.isPending,
+    assignVigilant: assignMutation.mutateAsync,
+    isAssigning: assignMutation.isPending,
+    addNote: noteMutation.mutateAsync,
+    isSendingNote: noteMutation.isPending,
+  }
 }

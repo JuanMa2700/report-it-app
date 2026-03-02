@@ -7,7 +7,7 @@ import { ReportDetail } from '@/components/dashboard/report-detail'
 import type { ReportStatus, Urgency } from '@/lib/types'
 
 export function DashboardPage() {
-  const { reports, stats, isLoading, filters, setFilters, refetch } = useReports()
+  const { reports, stats, isLoading, filters, setFilters } = useReports()
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const [viewingReportId, setViewingReportId] = useState<string | null>(null)
 
@@ -68,7 +68,6 @@ export function DashboardPage() {
           <ReportDetail
             reportId={viewingReportId}
             onBack={handleBackToList}
-            onReportUpdated={refetch}
           />
         ) : (
           <ReportList

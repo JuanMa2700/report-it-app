@@ -20,7 +20,6 @@ import type { ReportStatus } from '@/lib/types'
 interface ReportDetailProps {
   reportId: string
   onBack: () => void
-  onReportUpdated: () => void
 }
 
 function timeAgo(dateStr: string): string {
@@ -44,53 +43,43 @@ function formatDate(dateStr: string): string {
   })
 }
 
-export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetailProps) {
-  const { report, notes, vigilants, isLoading, updateStatus, assignVigilant, addNote } =
-    useReportDetail(reportId)
+export function ReportDetail({ reportId, onBack }: ReportDetailProps) {
+  const {
+    report, notes, vigilants, isLoading,
+    updateStatus, isUpdatingStatus,
+    assignVigilant, isAssigning,
+    addNote, isSendingNote,
+  } = useReportDetail(reportId)
   const [noteText, setNoteText] = useState('')
-  const [isSendingNote, setIsSendingNote] = useState(false)
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
-  const [isAssigning, setIsAssigning] = useState(false)
   const [actionError, setActionError] = useState('')
 
   async function handleStatusChange(status: string) {
     setActionError('')
-    setIsUpdatingStatus(true)
     try {
       await updateStatus(status as ReportStatus)
-      onReportUpdated()
     } catch {
       setActionError('Error al actualizar estado')
-    } finally {
-      setIsUpdatingStatus(false)
     }
   }
 
   async function handleAssign(userId: string) {
     if (userId === 'unassigned') return
     setActionError('')
-    setIsAssigning(true)
     try {
       await assignVigilant(userId)
-      onReportUpdated()
     } catch {
       setActionError('Error al asignar vigilante')
-    } finally {
-      setIsAssigning(false)
     }
   }
 
   async function handleAddNote(e: FormEvent) {
     e.preventDefault()
     if (!noteText.trim()) return
-    setIsSendingNote(true)
     try {
       await addNote(noteText.trim())
       setNoteText('')
     } catch {
       setActionError('Error al agregar nota')
-    } finally {
-      setIsSendingNote(false)
     }
   }
 

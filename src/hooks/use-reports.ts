@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { ALL_STATUSES } from '@/lib/constants'
 import type { Report, ReportStatus, Urgency, PaginatedResponse } from '@/lib/types'
@@ -15,70 +16,56 @@ interface Filters {
   urgency: Urgency | 'ALL'
 }
 
+async function fetchStats(): Promise<ReportStats> {
+  const results = await Promise.all(
+    ALL_STATUSES.map((status) =>
+      api.get<PaginatedResponse<Report>>('/reports', { params: { status, limit: 1 } }),
+    ),
+  )
+  const stats: ReportStats = { PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0, DISMISSED: 0 }
+  ALL_STATUSES.forEach((status, i) => {
+    stats[status] = results[i].data.total
+  })
+  return stats
+}
+
+async function fetchReports(filters: Filters): Promise<Report[]> {
+  const { data } = await api.get<PaginatedResponse<Report>>('/reports', {
+    params: {
+      limit: 100,
+      ...(filters.status !== 'ALL' && { status: filters.status }),
+      ...(filters.urgency !== 'ALL' && { urgency: filters.urgency }),
+    },
+  })
+  return data.data
+}
+
 export function useReports() {
-  const [reports, setReports] = useState<Report[]>([])
-  const [stats, setStats] = useState<ReportStats>({ PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0, DISMISSED: 0 })
-  const [isLoading, setIsLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [filters, setFilters] = useState<Filters>({ status: 'ALL', urgency: 'ALL' })
-  const statsLoaded = useRef(false)
 
-  // Fetch stats only once on mount (and on explicit refetch)
-  const fetchStats = useCallback(async () => {
-    const results = await Promise.all(
-      ALL_STATUSES.map((status) =>
-        api.get<PaginatedResponse<Report>>('/reports', { params: { status, limit: 1 } }),
-      ),
-    )
-    const newStats: ReportStats = { PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0, DISMISSED: 0 }
-    ALL_STATUSES.forEach((status, i) => {
-      newStats[status] = results[i].data.total
-    })
-    setStats(newStats)
-  }, [])
+  const statsQuery = useQuery({
+    queryKey: ['reports', 'stats'],
+    queryFn: fetchStats,
+  })
 
-  // Fetch filtered list
-  const fetchList = useCallback(async () => {
-    const { data } = await api.get<PaginatedResponse<Report>>('/reports', {
-      params: {
-        limit: 100,
-        ...(filters.status !== 'ALL' && { status: filters.status }),
-        ...(filters.urgency !== 'ALL' && { urgency: filters.urgency }),
-      },
-    })
-    setReports(data.data)
-  }, [filters])
+  const reportsQuery = useQuery({
+    queryKey: ['reports', 'list', filters],
+    queryFn: () => fetchReports(filters),
+  })
 
-  // On mount: load stats + list
-  // On filter change: only reload list
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setIsLoading(true)
-      try {
-        if (!statsLoaded.current) {
-          await Promise.all([fetchStats(), fetchList()])
-          statsLoaded.current = true
-        } else {
-          await fetchList()
-        }
-      } catch (err) {
-        if (!cancelled) console.error('Failed to fetch reports:', err)
-      } finally {
-        if (!cancelled) setIsLoading(false)
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [fetchStats, fetchList])
+  const isLoading = statsQuery.isLoading || reportsQuery.isLoading
 
-  // Explicit refetch reloads both stats and list
-  const refetch = useCallback(async () => {
-    try {
-      await Promise.all([fetchStats(), fetchList()])
-    } catch (err) {
-      console.error('Failed to refetch reports:', err)
-    }
-  }, [fetchStats, fetchList])
+  function refetch() {
+    queryClient.invalidateQueries({ queryKey: ['reports'] })
+  }
 
-  return { reports, stats, isLoading, filters, setFilters, refetch }
+  return {
+    reports: reportsQuery.data ?? [],
+    stats: statsQuery.data ?? { PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0, DISMISSED: 0 },
+    isLoading,
+    filters,
+    setFilters,
+    refetch,
+  }
 }

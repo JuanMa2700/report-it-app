@@ -124,15 +124,15 @@ export function LoginPage() {
       {/* Right — Login form */}
       <div className="flex w-full flex-col lg:w-[45%]">
         <div className="h-[3px] shrink-0 bg-gradient-to-r from-violet-500 via-purple-500 to-violet-600 lg:hidden" />
-        <div className="flex flex-1 flex-col items-center justify-center px-6 sm:px-12">
+        <div className="flex flex-1 flex-col items-center justify-center px-5 sm:px-12">
           <div className="w-full max-w-sm">
-            <div className="mb-8 text-center">
+            <div className="mb-6 text-center sm:mb-8">
               <img
                 src="/logo.png"
                 alt="YoReporto"
-                className="mx-auto mb-4 h-12 lg:h-14"
+                className="mx-auto mb-3 h-10 sm:mb-4 sm:h-12 lg:h-14"
               />
-              <h2 className="text-xl font-semibold">Bienvenido de vuelta</h2>
+              <h2 className="text-lg font-semibold sm:text-xl">Bienvenido de vuelta</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Ingresa al panel de vigilancia
               </p>

@@ -155,42 +155,44 @@ export function ReportDetail({ reportId, onBack }: ReportDetailProps) {
 
             {/* Actions */}
             <div className="space-y-3 rounded-lg border bg-muted/30 p-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">
-                  Estado
-                  {isUpdatingStatus && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
-                </label>
-                <Select value={report.status} onValueChange={handleStatusChange} disabled={isUpdatingStatus}>
-                  <SelectTrigger className="h-9 cursor-pointer">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALL_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s} className="cursor-pointer">{STATUS_LABELS[s]}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">
-                  Asignado a
-                  {isAssigning && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
-                </label>
-                <Select
-                  value={report.assignedToId ?? 'unassigned'}
-                  onValueChange={handleAssign}
-                  disabled={isAssigning}
-                >
-                  <SelectTrigger className="h-9 cursor-pointer">
-                    <SelectValue placeholder="Sin asignar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unassigned" disabled>Sin asignar</SelectItem>
-                    {vigilants.map((v) => (
-                      <SelectItem key={v.id} value={v.id} className="cursor-pointer">{v.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">
+                    Estado
+                    {isUpdatingStatus && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
+                  </label>
+                  <Select value={report.status} onValueChange={handleStatusChange} disabled={isUpdatingStatus}>
+                    <SelectTrigger className="h-9 cursor-pointer">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s} className="cursor-pointer">{STATUS_LABELS[s]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">
+                    Asignado a
+                    {isAssigning && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
+                  </label>
+                  <Select
+                    value={report.assignedToId ?? 'unassigned'}
+                    onValueChange={handleAssign}
+                    disabled={isAssigning}
+                  >
+                    <SelectTrigger className="h-9 cursor-pointer">
+                      <SelectValue placeholder="Sin asignar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned" disabled>Sin asignar</SelectItem>
+                      {vigilants.map((v) => (
+                        <SelectItem key={v.id} value={v.id} className="cursor-pointer">{v.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               {actionError && (
                 <p className="text-xs text-destructive">{actionError}</p>

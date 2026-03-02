@@ -27,9 +27,9 @@ export function NavBar() {
       .slice(0, 2) ?? "";
 
   return (
-    <header className="flex h-16 shrink-0 items-center border-b border-violet-100 bg-violet-50/60 px-6">
-      <Link to="/dashboard" className="mr-8">
-        <img src="/logo.png" alt="YoReporto" className="h-12" />
+    <header className="flex h-14 shrink-0 items-center border-b border-violet-100 bg-violet-50/60 px-3 sm:h-16 sm:px-6">
+      <Link to="/dashboard" className="mr-4 sm:mr-8">
+        <img src="/logo.png" alt="YoReporto" className="h-9 sm:h-12" />
       </Link>
 
       <nav className="flex items-center gap-1">
@@ -38,14 +38,14 @@ export function NavBar() {
             key={link.to}
             to={link.to}
             className={cn(
-              "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+              "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors hover:bg-accent sm:px-3 sm:py-2",
               location.pathname === link.to
                 ? "bg-accent text-accent-foreground"
                 : "text-muted-foreground",
             )}
           >
             <link.icon className="h-4 w-4" />
-            {link.label}
+            <span className="hidden sm:inline">{link.label}</span>
           </Link>
         ))}
       </nav>
@@ -58,7 +58,7 @@ export function NavBar() {
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium">{user?.name}</span>
+            <span className="hidden text-sm font-medium sm:inline">{user?.name}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={logout}>

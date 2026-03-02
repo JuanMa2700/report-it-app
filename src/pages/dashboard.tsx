@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useReports } from '@/hooks/use-reports'
+import { useMediaQuery } from '@/hooks/use-media-query'
 import { StatCards } from '@/components/dashboard/stat-cards'
 import { ReportMap } from '@/components/dashboard/report-map'
 import { ReportList } from '@/components/dashboard/report-list'
@@ -15,11 +16,12 @@ export function DashboardPage() {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const [viewingReportId, setViewingReportId] = useState<string | null>(null)
   const [mobileTab, setMobileTab] = useState<MobileTab>('map')
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const handleSelectReport = useCallback((id: string) => {
     setSelectedReportId(id)
     setViewingReportId(id)
-    setMobileTab('list') // show detail on mobile when selecting from map
+    setMobileTab('list')
   }, [])
 
   const handleBackToList = useCallback(() => {
@@ -69,10 +71,30 @@ export function DashboardPage() {
     />
   )
 
+  if (isDesktop) {
+    return (
+      <div className="flex h-full min-h-0 gap-4 p-4">
+        <div className="flex w-[70%] min-h-0 flex-col gap-3">
+          <StatCards stats={stats} activeFilter={filters.status} onFilterClick={handleStatusFilterFromCard} />
+          <div className="min-h-0 flex-1">
+            <ReportMap
+              reports={reports}
+              selectedReportId={selectedReportId}
+              onSelectReport={handleSelectReport}
+            />
+          </div>
+        </div>
+        <div className="w-[30%] min-h-0">
+          {listOrDetail}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Mobile tab bar */}
-      <div className="flex shrink-0 border-b lg:hidden">
+      <div className="flex shrink-0 border-b">
         <button
           type="button"
           className={cn(
@@ -102,7 +124,7 @@ export function DashboardPage() {
       </div>
 
       {/* Mobile: toggled views */}
-      <div className="flex min-h-0 flex-1 flex-col lg:hidden">
+      <div className="flex min-h-0 flex-1 flex-col">
         {mobileTab === 'map' ? (
           <div className="flex min-h-0 flex-1 flex-col gap-2 p-3">
             <StatCards stats={stats} activeFilter={filters.status} onFilterClick={handleStatusFilterFromCard} />
@@ -119,23 +141,6 @@ export function DashboardPage() {
             {listOrDetail}
           </div>
         )}
-      </div>
-
-      {/* Desktop: side-by-side layout */}
-      <div className="hidden min-h-0 flex-1 gap-4 p-4 lg:flex">
-        <div className="flex w-[70%] min-h-0 flex-col gap-3">
-          <StatCards stats={stats} activeFilter={filters.status} onFilterClick={handleStatusFilterFromCard} />
-          <div className="min-h-0 flex-1">
-            <ReportMap
-              reports={reports}
-              selectedReportId={selectedReportId}
-              onSelectReport={handleSelectReport}
-            />
-          </div>
-        </div>
-        <div className="w-[30%] min-h-0">
-          {listOrDetail}
-        </div>
       </div>
     </div>
   )

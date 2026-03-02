@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '@/lib/api'
 import { ALL_STATUSES } from '@/lib/constants'
 import type { Report, ReportStatus, Urgency, PaginatedResponse } from '@/lib/types'
@@ -20,41 +20,65 @@ export function useReports() {
   const [stats, setStats] = useState<ReportStats>({ PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0, DISMISSED: 0 })
   const [isLoading, setIsLoading] = useState(true)
   const [filters, setFilters] = useState<Filters>({ status: 'ALL', urgency: 'ALL' })
+  const statsLoaded = useRef(false)
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const [statsResults, listResult] = await Promise.all([
-        Promise.all(
-          ALL_STATUSES.map((status) =>
-            api.get<PaginatedResponse<Report>>('/reports', { params: { status, limit: 1 } }),
-          ),
-        ),
-        api.get<PaginatedResponse<Report>>('/reports', {
-          params: {
-            limit: 100,
-            ...(filters.status !== 'ALL' && { status: filters.status }),
-            ...(filters.urgency !== 'ALL' && { urgency: filters.urgency }),
-          },
-        }),
-      ])
+  // Fetch stats only once on mount (and on explicit refetch)
+  const fetchStats = useCallback(async () => {
+    const results = await Promise.all(
+      ALL_STATUSES.map((status) =>
+        api.get<PaginatedResponse<Report>>('/reports', { params: { status, limit: 1 } }),
+      ),
+    )
+    const newStats: ReportStats = { PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0, DISMISSED: 0 }
+    ALL_STATUSES.forEach((status, i) => {
+      newStats[status] = results[i].data.total
+    })
+    setStats(newStats)
+  }, [])
 
-      const newStats: ReportStats = { PENDING: 0, IN_PROGRESS: 0, RESOLVED: 0, DISMISSED: 0 }
-      ALL_STATUSES.forEach((status, i) => {
-        newStats[status] = statsResults[i].data.total
-      })
-      setStats(newStats)
-      setReports(listResult.data.data)
-    } catch (err) {
-      console.error('Failed to fetch reports:', err)
-    } finally {
-      setIsLoading(false)
-    }
+  // Fetch filtered list
+  const fetchList = useCallback(async () => {
+    const { data } = await api.get<PaginatedResponse<Report>>('/reports', {
+      params: {
+        limit: 100,
+        ...(filters.status !== 'ALL' && { status: filters.status }),
+        ...(filters.urgency !== 'ALL' && { urgency: filters.urgency }),
+      },
+    })
+    setReports(data.data)
   }, [filters])
 
+  // On mount: load stats + list
+  // On filter change: only reload list
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    let cancelled = false
+    async function load() {
+      setIsLoading(true)
+      try {
+        if (!statsLoaded.current) {
+          await Promise.all([fetchStats(), fetchList()])
+          statsLoaded.current = true
+        } else {
+          await fetchList()
+        }
+      } catch (err) {
+        if (!cancelled) console.error('Failed to fetch reports:', err)
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [fetchStats, fetchList])
 
-  return { reports, stats, isLoading, filters, setFilters, refetch: fetchData }
+  // Explicit refetch reloads both stats and list
+  const refetch = useCallback(async () => {
+    try {
+      await Promise.all([fetchStats(), fetchList()])
+    } catch (err) {
+      console.error('Failed to refetch reports:', err)
+    }
+  }, [fetchStats, fetchList])
+
+  return { reports, stats, isLoading, filters, setFilters, refetch }
 }

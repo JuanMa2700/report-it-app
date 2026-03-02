@@ -26,7 +26,7 @@ export function ReportListItem({ report, isSelected, onClick }: ReportListItemPr
     <button
       type="button"
       className={cn(
-        'w-full rounded-lg border bg-card px-3 py-2 text-left transition-all hover:shadow-sm',
+        'w-full cursor-pointer rounded-lg border bg-card px-3 py-2 text-left transition-all hover:shadow-sm',
         isSelected && 'border-primary shadow-sm',
       )}
       onClick={onClick}

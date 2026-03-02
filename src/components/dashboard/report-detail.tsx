@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select'
 import { STATUS_LABELS, URGENCY_LABELS, ALL_STATUSES } from '@/lib/constants'
 import { ReportMediaGallery } from './report-media-gallery'
-import { ArrowLeft, MapPin, User, Calendar, Tag, Send, AlertTriangle, MessageSquare } from 'lucide-react'
+import { ArrowLeft, MapPin, User, Calendar, Tag, Send, AlertTriangle, MessageSquare, Loader2 } from 'lucide-react'
 import type { ReportStatus } from '@/lib/types'
 
 interface ReportDetailProps {
@@ -49,15 +49,35 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
     useReportDetail(reportId)
   const [noteText, setNoteText] = useState('')
   const [isSendingNote, setIsSendingNote] = useState(false)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const [isAssigning, setIsAssigning] = useState(false)
+  const [actionError, setActionError] = useState('')
 
   async function handleStatusChange(status: string) {
-    await updateStatus(status as ReportStatus)
-    onReportUpdated()
+    setActionError('')
+    setIsUpdatingStatus(true)
+    try {
+      await updateStatus(status as ReportStatus)
+      onReportUpdated()
+    } catch {
+      setActionError('Error al actualizar estado')
+    } finally {
+      setIsUpdatingStatus(false)
+    }
   }
 
   async function handleAssign(userId: string) {
-    await assignVigilant(userId)
-    onReportUpdated()
+    if (userId === 'unassigned') return
+    setActionError('')
+    setIsAssigning(true)
+    try {
+      await assignVigilant(userId)
+      onReportUpdated()
+    } catch {
+      setActionError('Error al asignar vigilante')
+    } finally {
+      setIsAssigning(false)
+    }
   }
 
   async function handleAddNote(e: FormEvent) {
@@ -67,6 +87,8 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
     try {
       await addNote(noteText.trim())
       setNoteText('')
+    } catch {
+      setActionError('Error al agregar nota')
     } finally {
       setIsSendingNote(false)
     }
@@ -76,13 +98,13 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
     return (
       <div className="flex h-full flex-col rounded-lg border bg-background">
         <div className="flex shrink-0 items-center gap-2 border-b p-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={onBack}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm text-muted-foreground">Cargando...</span>
         </div>
         <div className="flex flex-1 items-center justify-center">
-          <p className="text-sm text-muted-foreground">Cargando detalles...</p>
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       </div>
     )
@@ -92,7 +114,7 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
     <div className="flex h-full flex-col rounded-lg border bg-background">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-2 border-b p-3">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <span className="text-sm font-medium">Detalle del reporte</span>
@@ -147,14 +169,15 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">
                   Estado
+                  {isUpdatingStatus && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
                 </label>
-                <Select value={report.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="h-9">
+                <Select value={report.status} onValueChange={handleStatusChange} disabled={isUpdatingStatus}>
+                  <SelectTrigger className="h-9 cursor-pointer">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {ALL_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                      <SelectItem key={s} value={s} className="cursor-pointer">{STATUS_LABELS[s]}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -162,22 +185,27 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">
                   Asignado a
+                  {isAssigning && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
                 </label>
                 <Select
                   value={report.assignedToId ?? 'unassigned'}
-                  onValueChange={(v) => { if (v !== 'unassigned') handleAssign(v) }}
+                  onValueChange={handleAssign}
+                  disabled={isAssigning}
                 >
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 cursor-pointer">
                     <SelectValue placeholder="Sin asignar" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="unassigned" disabled>Sin asignar</SelectItem>
                     {vigilants.map((v) => (
-                      <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                      <SelectItem key={v.id} value={v.id} className="cursor-pointer">{v.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+              {actionError && (
+                <p className="text-xs text-destructive">{actionError}</p>
+              )}
             </div>
 
             {/* Urgency info */}
@@ -204,8 +232,8 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
                   onChange={(e) => setNoteText(e.target.value)}
                   className="h-9 text-sm"
                 />
-                <Button type="submit" size="icon" className="h-9 w-9 shrink-0" disabled={!noteText.trim() || isSendingNote}>
-                  <Send className="h-4 w-4" />
+                <Button type="submit" size="icon" className="h-9 w-9 shrink-0 cursor-pointer" disabled={!noteText.trim() || isSendingNote}>
+                  {isSendingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </form>
 

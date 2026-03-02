@@ -23,7 +23,7 @@ export function StatCards({ stats, activeFilter, onFilterClick }: StatCardsProps
           key={status}
           type="button"
           className={cn(
-            'flex items-center gap-3 rounded-lg border bg-card px-4 py-2.5 text-left shadow-sm transition-all hover:shadow-md',
+            'flex cursor-pointer items-center gap-3 rounded-lg border bg-card px-4 py-2.5 text-left shadow-sm transition-all hover:shadow-md',
             activeFilter === status && `ring-2 ${activeColor}`,
           )}
           onClick={() => onFilterClick(activeFilter === status ? 'ALL' : status)}

@@ -50,35 +50,37 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <StatCards stats={stats} activeFilter={filters.status} onFilterClick={handleStatusFilterFromCard} />
-      <div className="flex flex-1 gap-4 p-4 min-h-0">
-        <div className="w-[70%]">
+    <div className="flex h-full gap-4 p-4">
+      {/* Left column: stats + map */}
+      <div className="flex w-[70%] flex-col gap-3 min-h-0">
+        <StatCards stats={stats} activeFilter={filters.status} onFilterClick={handleStatusFilterFromCard} />
+        <div className="flex-1 min-h-0">
           <ReportMap
             reports={reports}
             selectedReportId={selectedReportId}
             onSelectReport={handleSelectReport}
           />
         </div>
-        <div className="w-[30%] min-h-0">
-          {viewingReportId ? (
-            <ReportDetail
-              reportId={viewingReportId}
-              onBack={handleBackToList}
-              onReportUpdated={refetch}
-            />
-          ) : (
-            <ReportList
-              reports={reports}
-              selectedReportId={selectedReportId}
-              onSelectReport={handleSelectReport}
-              statusFilter={filters.status}
-              urgencyFilter={filters.urgency}
-              onStatusChange={handleStatusChange}
-              onUrgencyChange={handleUrgencyChange}
-            />
-          )}
-        </div>
+      </div>
+      {/* Right column: list or detail (full height) */}
+      <div className="w-[30%] min-h-0">
+        {viewingReportId ? (
+          <ReportDetail
+            reportId={viewingReportId}
+            onBack={handleBackToList}
+            onReportUpdated={refetch}
+          />
+        ) : (
+          <ReportList
+            reports={reports}
+            selectedReportId={selectedReportId}
+            onSelectReport={handleSelectReport}
+            statusFilter={filters.status}
+            urgencyFilter={filters.urgency}
+            onStatusChange={handleStatusChange}
+            onUrgencyChange={handleUrgencyChange}
+          />
+        )}
       </div>
     </div>
   )

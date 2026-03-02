@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock, Loader2, CheckCircle2, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ReportStatus } from '@/lib/types'
@@ -18,24 +17,23 @@ const cards: { status: ReportStatus; label: string; icon: typeof Clock; color: s
 
 export function StatCards({ stats, activeFilter, onFilterClick }: StatCardsProps) {
   return (
-    <div className="grid grid-cols-4 gap-4 p-4 pb-0">
+    <div className="grid grid-cols-4 gap-3">
       {cards.map(({ status, label, icon: Icon, color, activeColor }) => (
-        <Card
+        <button
           key={status}
+          type="button"
           className={cn(
-            'cursor-pointer transition-all hover:shadow-md',
+            'flex items-center gap-3 rounded-lg border bg-card px-4 py-2.5 text-left shadow-sm transition-all hover:shadow-md',
             activeFilter === status && `ring-2 ${activeColor}`,
           )}
           onClick={() => onFilterClick(activeFilter === status ? 'ALL' : status)}
         >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-            <Icon className={cn('h-5 w-5', color)} />
-          </CardHeader>
-          <CardContent>
-            <div className={cn('text-3xl font-bold', color)}>{stats[status]}</div>
-          </CardContent>
-        </Card>
+          <Icon className={cn('h-5 w-5 shrink-0', color)} />
+          <div className="min-w-0">
+            <div className={cn('text-xl font-bold leading-tight', color)}>{stats[status]}</div>
+            <div className="text-xs text-muted-foreground">{label}</div>
+          </div>
+        </button>
       ))}
     </div>
   )

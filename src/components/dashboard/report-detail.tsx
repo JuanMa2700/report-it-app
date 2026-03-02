@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { STATUS_LABELS, URGENCY_LABELS, ALL_STATUSES } from '@/lib/constants'
+import { ReportMediaGallery } from './report-media-gallery'
 import { ArrowLeft, MapPin, User, Calendar, Tag, Send, AlertTriangle, MessageSquare } from 'lucide-react'
 import type { ReportStatus } from '@/lib/types'
 
@@ -137,6 +138,9 @@ export function ReportDetail({ reportId, onBack, onReportUpdated }: ReportDetail
               <h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">Descripción</h3>
               <p className="text-sm leading-relaxed">{report.description}</p>
             </div>
+
+            {/* Media */}
+            <ReportMediaGallery media={report.media} />
 
             {/* Actions */}
             <div className="space-y-3 rounded-lg border bg-muted/30 p-3">

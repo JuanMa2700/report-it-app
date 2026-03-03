@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function NavBar() {
@@ -16,6 +16,9 @@ export function NavBar() {
 
   const links = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    ...(user?.role === "ADMIN"
+      ? [{ to: "/analytics", label: "Analíticas", icon: BarChart3 }]
+      : []),
   ];
 
   const initials =

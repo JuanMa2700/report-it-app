@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { LoginPage } from '@/pages/login'
 import { UnauthorizedPage } from '@/pages/unauthorized'
 import { DashboardPage } from '@/pages/dashboard'
+import { AnalyticsPage } from '@/pages/analytics'
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,14 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
+          {
+            path: 'analytics',
+            element: (
+              <RoleGuard allowedRoles={['ADMIN']}>
+                <AnalyticsPage />
+              </RoleGuard>
+            ),
+          },
         ],
       },
     ],

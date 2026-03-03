@@ -1,4 +1,4 @@
-import type { ReportStatus, Urgency } from './types'
+import type { ReportStatus, Role, Urgency } from './types'
 
 export const STATUS_LABELS: Record<ReportStatus, string> = {
   PENDING: 'Pendiente',
@@ -40,3 +40,23 @@ export const MAP_DEFAULT_ZOOM = 13
 
 export const ALL_STATUSES: ReportStatus[] = ['PENDING', 'IN_PROGRESS', 'RESOLVED', 'DISMISSED']
 export const ALL_URGENCIES: Urgency[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+
+// Hex colors for Recharts (doesn't support oklch)
+export const URGENCY_MAP_COLORS: Record<Urgency, string> = {
+  LOW: '#64748b',
+  MEDIUM: '#eab308',
+  HIGH: '#f97316',
+  CRITICAL: '#ef4444',
+}
+
+export const ROLE_COLORS: Record<Role, string> = {
+  RESIDENT: '#8b5cf6',
+  VIGILANT: '#06b6d4',
+  ADMIN: '#6d28d9',
+}
+
+export const ROLE_LABELS: Record<Role, string> = {
+  RESIDENT: 'Residente',
+  VIGILANT: 'Vigilante',
+  ADMIN: 'Administrador',
+}

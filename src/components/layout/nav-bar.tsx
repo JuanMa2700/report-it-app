@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, LayoutDashboard, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "./notification-bell";
 
 export function NavBar() {
   const { user, logout } = useAuth();
@@ -53,7 +54,8 @@ export function NavBar() {
         ))}
       </nav>
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-1">
+        <NotificationBell />
         <DropdownMenu>
           <DropdownMenuTrigger className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 hover:bg-accent">
             <Avatar className="h-8 w-8">

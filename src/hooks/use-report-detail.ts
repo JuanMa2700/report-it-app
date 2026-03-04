@@ -1,27 +1,33 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '@/contexts/auth-context'
 import { api } from '@/lib/api'
 import type { Report, ReportNote, ReportStatus, User } from '@/lib/types'
 
-async function fetchReportDetail(reportId: string) {
-  const [reportRes, notesRes, usersRes] = await Promise.all([
+async function fetchReportAndNotes(reportId: string) {
+  const [reportRes, notesRes] = await Promise.all([
     api.get<Report>(`/reports/${reportId}`),
     api.get<ReportNote[]>(`/reports/${reportId}/notes`),
-    api.get<User[]>('/users'),
   ])
-  return {
-    report: reportRes.data,
-    notes: notesRes.data,
-    vigilants: usersRes.data.filter((u) => u.role === 'VIGILANT' || u.role === 'ADMIN'),
-  }
+  return { report: reportRes.data, notes: notesRes.data }
 }
 
 export function useReportDetail(reportId: string | null) {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
 
   const { data, isLoading } = useQuery({
     queryKey: ['report', reportId],
-    queryFn: () => fetchReportDetail(reportId!),
+    queryFn: () => fetchReportAndNotes(reportId!),
     enabled: !!reportId,
+  })
+
+  const { data: vigilants = [] } = useQuery({
+    queryKey: ['users', 'vigilants'],
+    queryFn: async () => {
+      const res = await api.get<User[]>('/users/vigilants')
+      return res.data
+    },
+    enabled: user?.role === 'ADMIN' || user?.role === 'VIGILANT',
   })
 
   const statusMutation = useMutation({
@@ -59,7 +65,7 @@ export function useReportDetail(reportId: string | null) {
   return {
     report: data?.report ?? null,
     notes: data?.notes ?? [],
-    vigilants: data?.vigilants ?? [],
+    vigilants,
     isLoading,
     updateStatus: statusMutation.mutateAsync,
     isUpdatingStatus: statusMutation.isPending,

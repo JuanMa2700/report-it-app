@@ -6,6 +6,7 @@ import { LoginPage } from '@/pages/login'
 import { UnauthorizedPage } from '@/pages/unauthorized'
 import { DashboardPage } from '@/pages/dashboard'
 import { AnalyticsPage } from '@/pages/analytics'
+import { NotificationsPage } from '@/pages/notifications'
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'notifications', element: <NotificationsPage /> },
           {
             path: 'analytics',
             element: (

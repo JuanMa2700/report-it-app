@@ -69,3 +69,15 @@ export interface LoginResponse {
   user: User
   token: string
 }
+
+export type NotificationType = 'STATUS_CHANGED' | 'REPORT_ASSIGNED' | 'NOTE_ADDED'
+
+export interface Notification {
+  id: string
+  type: NotificationType
+  title: string
+  body: string
+  reportId: string | null
+  read: boolean
+  createdAt: string
+}

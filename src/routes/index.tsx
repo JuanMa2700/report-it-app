@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { ProtectedRoute } from './protected-route'
 import { RoleGuard } from './role-guard'
 import { AppLayout } from '@/components/layout/app-layout'
+import { LandingPage } from '@/pages/landing'
 import { LoginPage } from '@/pages/login'
 import { UnauthorizedPage } from '@/pages/unauthorized'
 import { DashboardPage } from '@/pages/dashboard'
@@ -9,6 +10,10 @@ import { AnalyticsPage } from '@/pages/analytics'
 import { NotificationsPage } from '@/pages/notifications'
 
 const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LandingPage />,
+  },
   {
     path: '/login',
     element: <LoginPage />,
@@ -27,7 +32,6 @@ const router = createBrowserRouter([
           </RoleGuard>
         ),
         children: [
-          { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'notifications', element: <NotificationsPage /> },
           {

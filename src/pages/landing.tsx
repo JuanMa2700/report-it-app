@@ -535,7 +535,6 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 sm:px-8 md:flex-row">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="YoReporto" className="h-8 w-auto" />
-            <span className="text-sm font-semibold">YoReporto</span>
           </div>
           <p className="text-center text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} YoReporto. Seguridad para tu

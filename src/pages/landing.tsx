@@ -165,124 +165,21 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Product mockup */}
+          {/* Product video */}
           <div className="relative flex items-center justify-center">
-            <div className="relative w-full max-w-md">
-              <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
-              <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/95 shadow-2xl backdrop-blur">
-                {/* Fake window chrome */}
-                <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-50 px-4 py-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                  <span className="ml-3 text-xs font-medium text-slate-500">
-                    panel.yoreporto.com
-                  </span>
-                </div>
-                {/* Fake dashboard */}
-                <div className="bg-slate-50 p-4">
-                  {/* Stat cards */}
-                  <div className="mb-4 grid grid-cols-3 gap-2">
-                    {[
-                      { label: "Activos", value: "24", color: "bg-violet-500" },
-                      { label: "Urgentes", value: "6", color: "bg-red-500" },
-                      {
-                        label: "Resueltos",
-                        value: "182",
-                        color: "bg-emerald-500",
-                      },
-                    ].map((s) => (
-                      <div
-                        key={s.label}
-                        className="rounded-lg border border-slate-200 bg-white p-3"
-                      >
-                        <div
-                          className={`mb-2 h-1 w-8 rounded-full ${s.color}`}
-                        />
-                        <div className="text-lg font-bold text-slate-900">
-                          {s.value}
-                        </div>
-                        <div className="text-[10px] text-slate-500">
-                          {s.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Fake map */}
-                  <div className="relative h-40 overflow-hidden rounded-lg border border-slate-200 bg-gradient-to-br from-violet-100 via-slate-100 to-violet-50">
-                    <div className="absolute inset-0 opacity-30">
-                      <svg
-                        className="h-full w-full"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <defs>
-                          <pattern
-                            id="map-grid"
-                            width="20"
-                            height="20"
-                            patternUnits="userSpaceOnUse"
-                          >
-                            <path
-                              d="M 20 0 L 0 0 0 20"
-                              fill="none"
-                              stroke="#a78bfa"
-                              strokeWidth="0.5"
-                            />
-                          </pattern>
-                        </defs>
-                        <rect
-                          width="100%"
-                          height="100%"
-                          fill="url(#map-grid)"
-                        />
-                      </svg>
-                    </div>
-                    {[
-                      { top: "20%", left: "25%", color: "bg-red-500" },
-                      { top: "55%", left: "60%", color: "bg-violet-500" },
-                      { top: "35%", left: "75%", color: "bg-amber-500" },
-                      { top: "70%", left: "30%", color: "bg-emerald-500" },
-                    ].map((m, i) => (
-                      <div
-                        key={i}
-                        className="absolute"
-                        style={{ top: m.top, left: m.left }}
-                      >
-                        <span
-                          className={`absolute inset-0 animate-ping rounded-full ${m.color} opacity-50`}
-                        />
-                        <span
-                          className={`relative block h-3 w-3 rounded-full ${m.color} ring-2 ring-white`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  {/* Fake list */}
-                  <div className="mt-3 space-y-2">
-                    {[
-                      { cat: "Robo", prio: "Alta", color: "bg-red-500" },
-                      {
-                        cat: "Vandalismo",
-                        prio: "Media",
-                        color: "bg-amber-500",
-                      },
-                    ].map((r, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2"
-                      >
-                        <span className={`h-2 w-2 rounded-full ${r.color}`} />
-                        <span className="text-xs font-medium text-slate-700">
-                          {r.cat}
-                        </span>
-                        <span className="ml-auto text-[10px] text-slate-500">
-                          {r.prio}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            <div className="relative w-full">
+              <div className="pointer-events-none absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
+              <video
+                src="/presentation.mp4"
+                controls
+                autoPlay
+                loop
+                playsInline
+                preload="metadata"
+                className="relative block aspect-video w-full rounded-2xl shadow-2xl"
+              >
+                Tu navegador no soporta la reproducción de video.
+              </video>
             </div>
           </div>
         </div>

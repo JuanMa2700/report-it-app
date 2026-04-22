@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/lib/api";
 import {
   MapPin,
   Bell,
@@ -23,17 +24,28 @@ export function LandingPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const subject = encodeURIComponent(
-      `Solicitud de demo — ${form.organization || form.name}`
-    );
-    const body = encodeURIComponent(
-      `Nombre: ${form.name}\nEmail: ${form.email}\nOrganización: ${form.organization}\n\nMensaje:\n${form.message}`
-    );
-    window.location.href = `mailto:dianapradavanegas@gmail.com?subject=${subject}&body=${body}`;
-    setSubmitted(true);
+    setSubmitting(true);
+    setError(null);
+    try {
+      await api.post("/demo-requests", {
+        name: form.name,
+        email: form.email,
+        organization: form.organization || undefined,
+        message: form.message || undefined,
+      });
+      setSubmitted(true);
+    } catch {
+      setError(
+        "No pudimos enviar tu solicitud. Intenta de nuevo o escríbenos a dianapradavanegas@gmail.com.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -113,9 +125,9 @@ export function LandingPage() {
               </span>
             </h1>
             <p className="mb-8 max-w-lg text-lg text-violet-100">
-              YoReporto centraliza los reportes de incidentes, coordina respuestas
-              y te da visibilidad total sobre la seguridad de tu comunidad desde
-              un solo panel.
+              YoReporto centraliza los reportes de incidentes, coordina
+              respuestas y te da visibilidad total sobre la seguridad de tu
+              comunidad desde un solo panel.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button
@@ -218,7 +230,11 @@ export function LandingPage() {
                             />
                           </pattern>
                         </defs>
-                        <rect width="100%" height="100%" fill="url(#map-grid)" />
+                        <rect
+                          width="100%"
+                          height="100%"
+                          fill="url(#map-grid)"
+                        />
                       </svg>
                     </div>
                     {[
@@ -232,7 +248,9 @@ export function LandingPage() {
                         className="absolute"
                         style={{ top: m.top, left: m.left }}
                       >
-                        <span className={`absolute inset-0 animate-ping rounded-full ${m.color} opacity-50`} />
+                        <span
+                          className={`absolute inset-0 animate-ping rounded-full ${m.color} opacity-50`}
+                        />
                         <span
                           className={`relative block h-3 w-3 rounded-full ${m.color} ring-2 ring-white`}
                         />
@@ -243,7 +261,11 @@ export function LandingPage() {
                   <div className="mt-3 space-y-2">
                     {[
                       { cat: "Robo", prio: "Alta", color: "bg-red-500" },
-                      { cat: "Vandalismo", prio: "Media", color: "bg-amber-500" },
+                      {
+                        cat: "Vandalismo",
+                        prio: "Media",
+                        color: "bg-amber-500",
+                      },
                     ].map((r, i) => (
                       <div
                         key={i}
@@ -267,7 +289,10 @@ export function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 lg:py-28">
+      <section
+        id="features"
+        className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 lg:py-28"
+      >
         <div className="mx-auto mb-16 max-w-2xl text-center">
           <span className="mb-3 inline-block rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
             Funcionalidades
@@ -331,7 +356,10 @@ export function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="scroll-mt-20 border-y border-border bg-accent/30 py-20 lg:py-28">
+      <section
+        id="how-it-works"
+        className="scroll-mt-20 border-y border-border bg-accent/30 py-20 lg:py-28"
+      >
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -390,7 +418,10 @@ export function LandingPage() {
       </section>
 
       {/* Demo CTA */}
-      <section id="demo" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 lg:py-28">
+      <section
+        id="demo"
+        className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20 sm:px-8 lg:py-28"
+      >
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-violet-800 p-8 shadow-xl sm:p-12 lg:p-16">
           {/* Pattern overlay */}
           <div className="absolute inset-0 opacity-10">
@@ -421,8 +452,8 @@ export function LandingPage() {
                 Agenda una demo personalizada
               </h2>
               <p className="mb-8 max-w-md text-lg text-violet-100">
-                Cuéntanos sobre tu comunidad u organización y te mostraremos cómo
-                YoReporto se adapta a tus necesidades. Sin compromiso.
+                Cuéntanos sobre tu comunidad u organización y te mostraremos
+                cómo YoReporto se adapta a tus necesidades. Sin compromiso.
               </p>
               <ul className="space-y-3">
                 {[
@@ -430,7 +461,10 @@ export function LandingPage() {
                   "Configuración sugerida para tu caso",
                   "Respuesta en menos de 24 horas",
                 ].map((i) => (
-                  <li key={i} className="flex items-center gap-3 text-violet-100">
+                  <li
+                    key={i}
+                    className="flex items-center gap-3 text-violet-100"
+                  >
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-300" />
                     {i}
                   </li>
@@ -446,13 +480,20 @@ export function LandingPage() {
                   </div>
                   <h3 className="mb-2 text-xl font-semibold">¡Gracias!</h3>
                   <p className="text-muted-foreground">
-                    Se abrió tu cliente de correo con la solicitud. Te responderemos
-                    muy pronto.
+                    Recibimos tu solicitud. Te responderemos muy pronto.
                   </p>
                   <Button
                     variant="outline"
                     className="mt-6"
-                    onClick={() => setSubmitted(false)}
+                    onClick={() => {
+                      setSubmitted(false);
+                      setForm({
+                        name: "",
+                        email: "",
+                        organization: "",
+                        message: "",
+                      });
+                    }}
                   >
                     Enviar otra solicitud
                   </Button>
@@ -516,9 +557,19 @@ export function LandingPage() {
                       className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
-                  <Button type="submit" size="lg" className="h-12 w-full text-base">
-                    Solicitar demo
-                    <ArrowRight className="ml-1 h-4 w-4" />
+                  {error && (
+                    <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {error}
+                    </p>
+                  )}
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={submitting}
+                    className="h-12 w-full text-base"
+                  >
+                    {submitting ? "Enviando..." : "Solicitar demo"}
+                    {!submitting && <ArrowRight className="ml-1 h-4 w-4" />}
                   </Button>
                   <p className="text-center text-xs text-muted-foreground">
                     Al enviar aceptas que te contactemos por email.

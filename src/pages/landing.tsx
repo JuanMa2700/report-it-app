@@ -319,6 +319,7 @@ export function LandingPage() {
           <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
             <video
               src="/presentation.mp4"
+              poster="/presentation-poster.png"
               controls
               autoPlay
               loop
